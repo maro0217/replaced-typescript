@@ -3,8 +3,12 @@ import { getAllPostIds, getPostData } from '../../lib/posts'
 import Head from 'next/head'
 import Date from '../../components/date'
 import utilStyles from '../../styles/utils.module.css'
+import { GetStaticPaths, GetStaticProps, NextPage } from 'next'
+import { Post } from '../../types/post'
 
-export default function Post({ postData }) {
+type Props = { postData: Post }
+
+const Post: NextPage<Props> = ({ postData }) => {
   return (
     <Layout>
       <Head>
@@ -21,7 +25,7 @@ export default function Post({ postData }) {
   )
 }
 
-export async function getStaticPaths() {
+export const getStaticPaths: GetStaticPaths<Pick<Post, "id">> = async ()  => {
   const paths = getAllPostIds()
   return {
     paths,
@@ -29,7 +33,15 @@ export async function getStaticPaths() {
   }
 }
 
-export async function getStaticProps({ params }) {
+//ファイルルーティングで割り当てられたid
+
+export const getStaticProps: GetStaticProps<Props, { id: string }> = async ({ params }) => {
+
+  if (!params) {
+    return {
+      notFound: true
+    };
+  }
   const postData = await getPostData(params.id)
   return {
     props: {
@@ -37,3 +49,5 @@ export async function getStaticProps({ params }) {
     }
   }
 }
+
+export default Post
